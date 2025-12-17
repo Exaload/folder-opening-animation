@@ -104,6 +104,38 @@
                 </div>
             </div>
         </section>
+
+        <section class="demo-section">
+            <h2>Header customization</h2>
+            <div class="folder-grid">
+                <button folder-small-modal id="folder7" class="folder-btn">
+                    <div class="folder-icon">📁</div>
+                    <span>Custom title</span>
+                </button>
+                <div folder-content-for="folder7" class="folder-content" folder-title="My custom title" folder-icon="🚀" folder-header-bg="linear-gradient(90deg, #667eea, #764ba2)">
+                    <div class="folder-item">Custom header bg</div>
+                    <div class="folder-item">Custom icon & title</div>
+                </div>
+
+                <button folder-small-modal id="folder8" class="folder-btn">
+                    <div class="folder-icon">📁</div>
+                    <span>No header</span>
+                </button>
+                <div folder-content-for="folder8" class="folder-content" folder-hide-header folder-padding="15">
+                    <div class="folder-item">Header hidden</div>
+                    <div class="folder-item">Click overlay to close</div>
+                </div>
+
+                <button folder-small-modal id="folder9" class="folder-btn">
+                    <div class="folder-icon">📁</div>
+                    <span>No close btn</span>
+                </button>
+                <div folder-content-for="folder9" class="folder-content" folder-hide-close folder-title="Press Escape">
+                    <div class="folder-item">Close button hidden</div>
+                    <div class="folder-item">Use Escape or overlay</div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <div class="folder-overlay"></div>

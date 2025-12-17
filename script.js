@@ -69,22 +69,36 @@
         modal.className = 'folder-modal opening';
         if (type === 'small') modal.classList.add('small-modal');
 
+        // header config from attrs
+        const hideHeader = content.hasAttribute('folder-hide-header');
+        const customTitle = content.getAttribute('folder-title');
+        const customIcon = content.getAttribute('folder-icon');
+        const hideClose = content.hasAttribute('folder-hide-close');
+        const headerBg = content.getAttribute('folder-header-bg');
+
         // header
-        const header = document.createElement('div');
-        header.className = 'folder-modal-header';
+        let header = null;
+        if (!hideHeader) {
+            header = document.createElement('div');
+            header.className = 'folder-modal-header';
+            if (headerBg) header.style.background = headerBg;
 
-        const title = document.createElement('div');
-        title.className = 'folder-modal-title';
-        title.innerHTML = `<span class="icon">${btn.querySelector('.folder-icon')?.textContent || '📁'}</span>
-                          <span>${btn.querySelector('span')?.textContent || 'Folder'}</span>`;
+            const title = document.createElement('div');
+            title.className = 'folder-modal-title';
+            const iconText = customIcon || btn.querySelector('.folder-icon')?.textContent || '📁';
+            const titleText = customTitle || btn.querySelector('span')?.textContent || 'Folder';
+            title.innerHTML = `<span class="icon">${iconText}</span><span>${titleText}</span>`;
 
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'folder-modal-close';
-        closeBtn.innerHTML = '✕';
-        closeBtn.addEventListener('click', closeCurrentModal);
+            header.appendChild(title);
 
-        header.appendChild(title);
-        header.appendChild(closeBtn);
+            if (!hideClose) {
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'folder-modal-close';
+                closeBtn.innerHTML = '✕';
+                closeBtn.addEventListener('click', closeCurrentModal);
+                header.appendChild(closeBtn);
+            }
+        }
 
         // body
         const body = document.createElement('div');
@@ -100,7 +114,7 @@
             body.appendChild(clone);
         });
 
-        modal.appendChild(header);
+        if (header) modal.appendChild(header);
         modal.appendChild(body);
         document.body.appendChild(modal);
 
@@ -152,8 +166,6 @@
         modal.style.height = `${targetRect.height}px`;
 
         // recalc origin for smooth anim
-        const modalCenterX = targetRect.left + targetRect.width / 2;
-        const modalCenterY = targetRect.top + targetRect.height / 2;
         const originX = ((startX - targetRect.left) / targetRect.width) * 100;
         const originY = ((startY - targetRect.top) / targetRect.height) * 100;
         modal.style.transformOrigin = `${originX}% ${originY}%`;
