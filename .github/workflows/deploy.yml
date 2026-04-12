@@ -1,0 +1,85 @@
+name: deploy to cdn
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: install dependencies
+              run: npm install
+
+            - name: setup python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: build dist
+              run: python build.py --strict
+
+            - name: extract version
+              id: version
+              run: echo "VERSION=$(python -c "import json; print(json.load(open('package.json'))['version'])")" >> $GITHUB_OUTPUT
+
+            - name: deploy via rsync
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+                  SERVER_IP: ${{ secrets.SERVER_IP }}
+                  USER: deploy
+                  VERSION: ${{ steps.version.outputs.VERSION }}
+              run: |
+                  echo "deploying folder-opening-animation $VERSION"
+                  ls -la dist/
+
+                  set -x
+
+                  mkdir -p ~/.ssh
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+                  ssh $USER@$SERVER_IP "mkdir -p /var/www/cdn/folder-opening-animation/$VERSION"
+                  rsync -avzO --checksum --delete ./dist/ $USER@$SERVER_IP:/var/www/cdn/folder-opening-animation/$VERSION/
+
+                  ssh $USER@$SERVER_IP "ln -sfn /var/www/cdn/folder-opening-animation/$VERSION /var/www/cdn/folder-opening-animation/latest"
+
+                  rsync -avzO --checksum --delete \
+                      --exclude='versions.json' \
+                      --exclude='index.html' \
+                      --exclude='latest' \
+                      --exclude='/[0-9]*.[0-9]*.[0-9]*/' \
+                      ./dist/ $USER@$SERVER_IP:/var/www/cdn/folder-opening-animation/
+
+                  scp .github/scripts/generate-index.sh $USER@$SERVER_IP:/tmp/generate-index-fa.sh
+                  ssh $USER@$SERVER_IP "bash /tmp/generate-index-fa.sh && rm /tmp/generate-index-fa.sh"
+
+                  echo "deployed: /folder-opening-animation/$VERSION/ + /folder-opening-animation/latest/"
+
+            - name: create git tag
+              env:
+                  VERSION: ${{ steps.version.outputs.VERSION }}
+              run: |
+                  tag="v$VERSION"
+                  if git rev-parse "$tag" >/dev/null 2>&1; then
+                      echo "tag $tag already exists, skipping"
+                  else
+                      git tag "$tag"
+                      git push origin "$tag"
+                      echo "created and pushed tag $tag"
+                  fi

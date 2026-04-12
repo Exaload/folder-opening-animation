@@ -1,0 +1,31 @@
+{
+    "name": "folder-opening-animation",
+    "version": "1.0.0",
+    "description": "Animated folder open/close modal component for Exaload projects",
+    "main": "dist/folder-animation.js",
+    "style": "dist/folder-animation.css",
+    "files": [
+        "dist/",
+        "src/"
+    ],
+    "scripts": {
+        "build": "python build.py",
+        "build:strict": "python build.py --strict"
+    },
+    "keywords": [
+        "folder",
+        "animation",
+        "modal",
+        "vanilla-js"
+    ],
+    "author": "Exaload / Thomas BLANC <thb5309@gmail.com>",
+    "license": "All rights reserved",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/exaload/folder-opening-animation"
+    },
+    "devDependencies": {
+        "clean-css-cli": "^5.6.3",
+        "terser": "^5.46.1"
+    }
+}
