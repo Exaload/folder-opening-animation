@@ -205,6 +205,7 @@
     }
 
     function closeCurrentModal() {
+        if (!currentModal || isAnimating) return;
         isAnimating = true;
 
         currentModal.classList.remove('opening');
